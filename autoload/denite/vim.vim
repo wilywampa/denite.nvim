@@ -70,7 +70,8 @@ def _temporary_scope():
         key = reform_bytes(nvim.eval('a:key'))
         bufname = reform_bytes(nvim.eval('a:bufname'))
         if key:
-            ui = denite__uis[reform_bytes(nvim.eval('a:bufname'))]
+            ui = denite__uis.get(reform_bytes(nvim.eval('a:bufname')),
+                                 next(iter(denite__uis.values())))
             _value = ui._context[reform_bytes(nvim.eval('a:key'))]
         else:
             # Return list of keys of any UI
@@ -97,7 +98,8 @@ def _temporary_scope():
     try:
         if not denite__uis:
             return
-        ui = denite__uis[reform_bytes(nvim.eval('a:bufname'))]
+        ui = denite__uis.get(reform_bytes(nvim.eval('a:bufname')),
+                             next(iter(denite__uis.values())))
         ui._context[nvim.eval('a:key')] = reform_bytes(nvim.eval('a:value'))
     except Exception as e:
         for line in traceback.format_exc().splitlines():

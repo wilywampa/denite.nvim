@@ -43,7 +43,7 @@ if not find_loader('vim'):
             if not _uis:
                 return
             if key:
-                context = _uis[bufname]._context
+                context = _uis.get(bufname, list(_uis.values())[0])._context
                 return context[key]
             else:
                 # Return list of keys of any UI
@@ -54,5 +54,5 @@ if not find_loader('vim'):
             key, value, bufname = args
             if not _uis:
                 return
-            context = _uis[bufname]._context
+            context = _uis.get(bufname, list(_uis.values())[0])._context
             context[key] = value
