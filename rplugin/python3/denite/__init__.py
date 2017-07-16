@@ -4,14 +4,12 @@
 # License: MIT license
 # =============================================================================
 
-import traceback
 from importlib import find_loader
 
 
 if not find_loader('vim'):
     import neovim
     from denite.ui.default import Default
-    _uis = {}  # type: dict
 
     @neovim.plugin
     class DeniteHandlers(object):
@@ -20,39 +18,57 @@ if not find_loader('vim'):
 
         @neovim.function('_denite_init', sync=True)
         def init_python(self, args):
-            _uis.clear()
+            self._uis = {}
             self._vim.vars['denite#_channel_id'] = self._vim.channel_id
             return
 
         @neovim.function('_denite_start', sync=True)
         def start(self, args):
-            from denite.util import error
             try:
-                buffer_name = args[1]['buffer_name']
-                if buffer_name not in _uis:
-                    _uis[buffer_name] = Default(self._vim)
-                return _uis[buffer_name].start(args[0], args[1])
+                ui = self.get_ui(args[1]['buffer_name'])
+                return ui.start(args[0], args[1])
             except Exception:
+                import traceback
+                import denite.util
                 for line in traceback.format_exc().splitlines():
-                    error(self._vim, line)
-                error(self._vim, 'Please execute :messages command.')
+                    denite.util.error(self._vim, line)
+                denite.util.error(self._vim,
+                                  'Please execute :messages command.')
+
+        @neovim.function('_denite_do_action', sync=True)
+        def take_action(self, args):
+            try:
+                ui = self.get_ui(args[0]['buffer_name'])
+                return ui._denite.do_action(args[0], args[1], args[2])
+            except Exception:
+                import traceback
+                import denite.util
+                for line in traceback.format_exc().splitlines():
+                    denite.util.error(self._vim, line)
+                denite.util.error(self._vim,
+                                  'Please execute :messages command.')
+
+        def get_ui(self, buffer_name):
+            if buffer_name not in self._uis:
+                self._uis[buffer_name] = Default(self._vim)
+            return self._uis[buffer_name]
 
         @neovim.function('_denite_get_context', sync=True)
         def get_context(self, args):
             key, bufname = args
-            if not _uis:
+            if not self._uis:
                 return
             if key:
-                context = _uis.get(bufname, list(_uis.values())[0])._context
+                context = self.get_ui(bufname)._context
                 return context[key]
             else:
                 # Return list of keys of any UI
-                return sorted(next(iter(_uis.values()))._context)
+                return sorted(next(iter(self._uis.values()))._context)
 
         @neovim.function('_denite_set_context', sync=True)
         def set_context(self, args):
             key, value, bufname = args
-            if not _uis:
+            if not self._uis:
                 return
-            context = _uis.get(bufname, list(_uis.values())[0])._context
+            context = self.get_ui(bufname)._context
             context[key] = value
