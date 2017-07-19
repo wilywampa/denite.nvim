@@ -89,11 +89,6 @@ class Default(object):
             if context['refresh']:
                 self.redraw()
         else:
-            if not sources:
-                # Ignore empty sources.
-                error(self._vim, 'Empty sources')
-                return
-
             if not context['mode']:
                 # Default mode
                 context['mode'] = 'insert'
@@ -104,6 +99,11 @@ class Default(object):
             self._context['is_redraw'] = False
             self._current_mode = context['mode']
             self._is_multi = len(sources) > 1
+
+            if not sources:
+                # Ignore empty sources.
+                error(self._vim, 'Empty sources')
+                return
 
             self.init_denite()
             self.init_cursor()
@@ -135,8 +135,6 @@ class Default(object):
 
         self._prev_curpos = self._vim.call('getcurpos')
         self._prev_wininfo = self._get_wininfo()
-        self._winheight = int(self._context['winheight'])
-        self._winwidth = int(self._context['winwidth'])
         self._prev_winid = int(self._context['prev_winid'])
         self._winrestcmd = self._vim.call('winrestcmd')
         self._winsaveview = self._vim.call('winsaveview')
@@ -145,7 +143,7 @@ class Default(object):
             self._scroll = round(self._winheight / 2)
         if self._context['cursor_shape']:
             self._guicursor = self._vim.options['guicursor']
-            self._vim.options['guicursor'] = 'n-v-c:None'
+            self._vim.options['guicursor'] = 'a:None'
 
         if self._winid > 0 and self._vim.call(
                 'win_gotoid', self._winid):
@@ -165,6 +163,9 @@ class Default(object):
         self._vim.command('nnoremap <silent><buffer> <CR> ' +
                           ':<C-u>Denite -resume -buffer_name=' +
                           self._context['buffer_name'] + '<CR>')
+
+        self._winheight = self._vim.current.window.height
+        self._winwidth = self._vim.current.window.width
 
         self._options = self._vim.current.buffer.options
         self._options['buftype'] = 'nofile'
@@ -505,6 +506,7 @@ class Default(object):
         self._vim.command('highlight! link CursorLine CursorLine')
         if self._vim.call('exists', '#ColorScheme'):
             self._vim.command('silent doautocmd ColorScheme')
+            self._vim.command('normal! zv')
         if self._context['cursor_shape']:
             self._vim.command('set guicursor&')
             self._vim.options['guicursor'] = self._guicursor
@@ -567,6 +569,8 @@ class Default(object):
         self._denite.start(self._context)
         self._denite.on_init(self._context)
         self._initialized = True
+        self._winheight = int(self._context['winheight'])
+        self._winwidth = int(self._context['winwidth'])
 
     def gather_candidates(self):
         self._context['is_redraw'] = True
