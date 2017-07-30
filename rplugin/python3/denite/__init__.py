@@ -52,3 +52,23 @@ if not find_loader('vim'):
             if buffer_name not in self._uis:
                 self._uis[buffer_name] = Default(self._vim)
             return self._uis[buffer_name]
+
+        @neovim.function('_denite_get_context', sync=True)
+        def get_context(self, args):
+            key, bufname = args
+            if not self._uis:
+                return
+            if key:
+                context = self.get_ui(bufname)._context
+                return context[key]
+            else:
+                # Return list of keys of any UI
+                return sorted(next(iter(self._uis.values()))._context)
+
+        @neovim.function('_denite_set_context', sync=True)
+        def set_context(self, args):
+            key, value, bufname = args
+            if not self._uis:
+                return
+            context = self.get_ui(bufname)._context
+            context[key] = value
