@@ -47,7 +47,8 @@ function! denite#helper#call_denite(command, args, line1, line2) abort
     let context.path = fnamemodify(bufname('%'), ':p:h')
   elseif a:command ==# 'DeniteProjectDir'
     let context.path = denite#util#path2project_directory(
-          \ get(context, 'path', getcwd()))
+          \ get(context, 'path', getcwd()),
+          \ get(context, 'root_markers', ''))
   endif
 
   call denite#start(args, context)
@@ -125,9 +126,9 @@ function! s:parse_options(cmdline) abort
     let name = substitute(tr(arg_key, '-', '_'), '=$', '', '')[1:]
     if name =~# '^no_'
       let name = name[3:]
-      let value = 0
+      let value = v:false
     else
-      let value = (arg_key =~# '=$') ? arg[len(arg_key) :] : 1
+      let value = (arg_key =~# '=$') ? arg[len(arg_key) :] : v:true
     endif
 
     if index(keys(denite#init#_user_options())
@@ -178,4 +179,7 @@ endfunction
 
 function! denite#helper#_set_oldfiles(oldfiles) abort
   let v:oldfiles = a:oldfiles
+endfunction
+function! denite#helper#_get_oldfiles() abort
+  return filter(copy(v:oldfiles), 'filereadable(v:val) || buflisted(v:val)')
 endfunction

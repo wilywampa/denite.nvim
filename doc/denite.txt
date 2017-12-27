@@ -123,7 +123,7 @@ EXAMPLES						*denite-examples*
 	" For ripgrep
 	" Note: It is slower than ag
 	call denite#custom#var('file_rec', 'command',
-	\ ['rg', '--files', '--glob', '!.git', ''])
+	\ ['rg', '--files', '--glob', '!.git'])
 	" For Pt(the platinum searcher)
 	" NOTE: It also supports windows.
 	call denite#custom#var('file_rec', 'command',
@@ -560,6 +560,10 @@ are on the neovim-prompt's builtin actions/mappings.
 <denite:move_to_bottom>
 		Move to the bottom visible candidate like |L|.
 
+				*denite-map-move_up_path*
+<denite:move_up_path>
+		Move to the upper path and restart Denite buffer.
+
 				*denite-map-paste_from_register*
 <denite:paste_from_register>
 		Paste the text from a specified register.
@@ -771,17 +775,15 @@ I		<denite:insert_to_head>
 L		<denite:move_to_bottom>
 M		<denite:print_messages>
 P		<denite:change_path>
+U		<denite:move_up_path>
 S		<denite:change_line>
 X		<denite:quick_move>
 a		<denite:append>
 b		<denite:move_caret_to_one_word_left>
-c		<denite:change_word>
 cc		<denite:change_line>
 cw		<denite:change_word>
 d		<denite:do_action:delete>
-dd		<denite:delete_entire_text>
 e		<denite:do_action:edit>
-e		<denite:move_caret_to_end_of_word>
 gg		<denite:move_to_first_line>
 h		<denite:move_caret_to_left>
 i		<denite:enter_mode:insert>
@@ -1223,6 +1225,12 @@ OPTIONS							*denite-options*
 -reversed
 		The candidates are reversed.
 		Default: false
+
+						*denite-options-root-markers*
+-root-markers={markers}
+		The project root marker files.
+		It is splitted by comma.
+		Default: ""
 
 						*denite-options-smartcase*
 -smartcase
@@ -1682,7 +1690,7 @@ openable	An interface to open the object.
 
 			switch
 				Switch to the window that is opening the
-				object.
+				object. If it isn't opened, fallback open.
 
 			tabswitch
 				Switch to the window that is opening the
@@ -1767,6 +1775,14 @@ sorter_reverse
 sorter_sublime
 		Uses the scoring algorithm from this article and its implementation:
 		https://bit.ly/reverse-engineering-sublime-text-s-fuzzy-match
+
+						*denite-filter-sorter_word*
+sorter_word
+		Simple filter to sort candidates by ascii order of word
+
+				*denite-filter-converter_abbr_word*
+converter_abbr_word
+		Convert candidate abbr to word.
 
 				*denite-filter-converter_relative_abbr*
 converter_relative_abbr
@@ -1947,6 +1963,14 @@ After create new Kind class, alias it to your source by >
 <
 in the "__init__" method of your source class.
 
+Note: If you want to change the source in the action, you can change
+"context['sources_queue']" like this: >
+
+    def action_refine(self, context):
+        context['sources_queue'].append([
+            {'name': 'myplugin', 'args': []},
+        ])
+
 ------------------------------------------------------------------------------
 KIND ATTRIBUTES					*denite-kind-attributes*
 
@@ -2036,6 +2060,13 @@ https://github.com/Jagua/vim-denite-ghq
 
 ==============================================================================
 FAQ							*denite-faq*
+
+Q: How to donate money to you?
+
+A: I don't get the donation, but if you want to donate, please support neovim
+project.  My plugins depends on neovim development.
+
+https://salt.bountysource.com/teams/neovim
 
 Q: denite can support Vim8?
 
@@ -2159,6 +2190,12 @@ A:
 <
 Please execute :GetChar and press <A-g>.
 If it is the same of g, your environment does not support <A-g>.
+
+Q: I want to narrow by path in grep source.
+
+A: >
+	call denite#custom#source('grep',
+	\ 'converters', ['converter_abbr_word'])
 
 ==============================================================================
 COMPATIBILITY						*denite-compatibility*

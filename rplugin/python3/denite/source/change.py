@@ -10,7 +10,7 @@ from .base import Base
 class Source(Base):
 
     def __init__(self, vim):
-        Base.__init__(self, vim)
+        super().__init__(vim)
 
         self.name = 'change'
         self.kind = 'file'
@@ -18,11 +18,13 @@ class Source(Base):
     def on_init(self, context):
         changes = []
         for change in self.vim.call('execute', 'changes').split('\n')[2:]:
-            l = change.split()
-            if len(l) < 4:
+            texts = change.split()
+            if len(texts) < 4:
                 continue
 
-            [linenr, col, text] = [int(l[1]), int(l[2]) + 1, ' '.join(l[3:])]
+            [linenr, col, text] = [int(texts[1]),
+                                   int(texts[2]) + 1,
+                                   ' '.join(texts[3:])]
 
             changes.append({
                 'word': '%4d-%-3d  %s' % (linenr, col, text),
