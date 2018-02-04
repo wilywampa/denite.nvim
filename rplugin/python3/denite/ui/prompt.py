@@ -18,8 +18,8 @@ class DenitePrompt(Prompt):
         self.action.unregister('prompt:cancel', fail_silently=True)
 
         self.harvest_interval = 0.01
-        self.__previous_text = self.text
-        self.__timeout = datetime.now()
+        self._previous_text = self.text
+        self._timeout = datetime.now()
 
     @property
     def text(self):
@@ -64,10 +64,10 @@ class DenitePrompt(Prompt):
         return super().on_update(status)
 
     def on_harvest(self):
-        if self.__timeout > datetime.now():
+        if self._timeout > datetime.now():
             return
 
-        if not self.denite.is_async and self.__previous_text == self.text:
+        if not self.denite.is_async and self._previous_text == self.text:
             return
 
         if self.denite.update_candidates():
@@ -75,8 +75,8 @@ class DenitePrompt(Prompt):
         else:
             self.denite.update_status()
 
-        if self.__previous_text != self.text:
-            self.__previous_text = self.text
+        if self._previous_text != self.text:
+            self._previous_text = self.text
             self.denite.init_cursor()
 
         # NOTE
@@ -88,11 +88,17 @@ class DenitePrompt(Prompt):
     def on_keypress(self, keystroke):
         m = ACTION_KEYSTROKE_PATTERN.match(str(keystroke))
         if m:
-            return self.action.call(self, m.group('action'))
+            bufvars = self.denite._bufvars
+            bufvars['denite_context'] = self.context
+            ret = self.action.call(self, m.group('action'))
+            if bufvars['denite_context'] != self.context:
+                # Update context
+                self.context = bufvars['denite_context']
+            return ret
         elif self.denite.current_mode == 'insert':
             # Updating text from a keystroke is a feature of 'insert' mode
             self.update_text(str(keystroke))
 
-        self.__timeout = datetime.now() + timedelta(
+        self._timeout = datetime.now() + timedelta(
                 milliseconds=int(self.context['updatetime'])
             )
