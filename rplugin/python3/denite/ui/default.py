@@ -117,9 +117,9 @@ class Default(object):
                 return
 
             self.init_denite()
-            self.init_cursor()
             self.gather_candidates()
             self.update_candidates()
+            self.init_cursor()
 
             if self.check_empty():
                 return
@@ -161,8 +161,9 @@ class Default(object):
 
         if (self._context['split'] != 'no' and self._winid > 0 and
                 self._vim.call('win_gotoid', self._winid)):
-            # Move the window to bottom
-            self._vim.command('wincmd J')
+            if self._context['split'] != 'vertical':
+                # Move the window to bottom
+                self._vim.command('wincmd J')
             self._winrestcmd = ''
         else:
             # Create new buffer
@@ -221,7 +222,7 @@ class Default(object):
 
         self._vim.command('silent doautocmd WinEnter')
         self._vim.command('silent doautocmd BufWinEnter')
-        self._vim.command('silent doautocmd FileType denite')
+        self._vim.command('doautocmd FileType denite')
 
         self.init_syntax()
 
