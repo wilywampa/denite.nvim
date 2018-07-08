@@ -353,6 +353,24 @@ def _quick_move(prompt, params):
     prompt.denite.update_cursor()
 
 
+def _multiple_mappings(prompt, params):
+    ret = None
+    for mapping in params.split(','):
+        ret = prompt.action.call(prompt, mapping)
+    return ret
+
+
+def _smart_delete_char_before_caret(prompt, params):
+    text = ''.join([
+        prompt.caret.get_backward_text(),
+        prompt.caret.get_forward_text(),
+    ])
+    if text:
+        return prompt.action.call(prompt, 'denite:delete_char_before_caret')
+    else:
+        return _quit(prompt, params)
+
+
 def _nop(prompt, params):
     pass
 
@@ -386,6 +404,7 @@ DEFAULT_ACTION_RULES = [
     ('denite:move_to_previous_line', _move_to_previous_line),
     ('denite:move_to_top', _move_to_top),
     ('denite:move_up_path', _move_up_path),
+    ('denite:multiple_mappings', _multiple_mappings),
     ('denite:nop', _nop),
     ('denite:print_messages', _print_messages),
     ('denite:quick_move', _quick_move),
@@ -403,6 +422,8 @@ DEFAULT_ACTION_RULES = [
     ('denite:scroll_window_downwards', _scroll_window_downwards),
     ('denite:scroll_window_up_one_line', _scroll_window_up_one_line),
     ('denite:scroll_window_upwards', _scroll_window_upwards),
+    ('denite:smart_delete_char_before_caret',
+     _smart_delete_char_before_caret),
     ('denite:suspend', _suspend),
     ('denite:toggle_matchers', _toggle_matchers),
     ('denite:toggle_select', _toggle_select),
