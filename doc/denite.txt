@@ -32,22 +32,22 @@ INTRODUCTION						*denite-introduction*
 displaying lists of information from within NeoVim/Vim. It can display and
 search through any arbitrary source, from files and directories to buffers.
 
-* Theoretically faster while the main process is executed by python
+* Theoretically faster while the main process is executed by python.
 
 * Theoretically more stable while no other processes can be performed when
 denite.nvim is executed.
 
 * The implementation is relatively simpler than unite.vim
 
-* Denite.nvim has great potential to implement a new feature
+* Denite.nvim has great potential to implement a new feature.
 
-* To send the pull request by Python3 is easier than Vim script
+* Sending pull requests using Python3 is easier than when using Vim script.
 
 * There are a lot of useful tools to keep code simple (linter, tester, etc...)
 in Python3.
 
 * The unite.vim is officially obsolete, minor bugs (or even major bugs) are
-not fixed anymore
+not fixed anymore.
 
 ==============================================================================
 USAGE							*denite-usage*
@@ -825,6 +825,8 @@ y		<denite:do_action:yank>
 zb		<denite:scroll_cursor_to_bottom>
 zt		<denite:scroll_cursor_to_top>
 zz		<denite:scroll_cursor_to_middle>
+<ScrollWheelUp>		<denite:scroll_window_down_one_line>
+<ScrollWheelDown>	<denite:scroll_window_downwards>
 
 ------------------------------------------------------------------------------
 FUNCTIONS						*denite-functions*
@@ -1166,6 +1168,13 @@ OPTIONS							*denite-options*
 		without shortening.
 
 		Default: "botright"
+
+						*denite-option-do*
+-do={command}
+		Execute a {command} for each candidate's default action.
+		You can use it like |:argdo|.
+
+		Default: ""
 
 						*denite-option-empty*
 -empty
@@ -2101,11 +2110,11 @@ action_{name} (Function) 			(Optional)
 
                     targets = context['targets']
 <
-		To get the source context, you could use "source" attribute in
-		"target": >
+		To get the source context, you could use "source_context"
+		attribute in "target": >
 
 		    for target in context['targets']:
-		      source_context = target['source']
+		      source_context = target['source_context']
 <
 		Note: The source must be
 		|denite-source-attribute-is_public_context|.
@@ -2225,6 +2234,12 @@ A: >
 
 	:Denite -resume -cursor-pos=+1 -immediately
 	:Denite -resume -cursor-pos=-1 -immediately
+
+Q: ":UniteNext"/":UniteDo" like commands are available?
+
+A: >
+
+	:Denite -resume -do='normal! A;'
 
 Q: I want to close denite buffer if grep results are empty.
 

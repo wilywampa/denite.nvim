@@ -14,4 +14,19 @@ function! s:suite.parse_options_args() abort
         \ 'foo:bar\:baz'), [[
         \ {'name': 'foo', 'args': ['bar:baz']},
         \ ], {}])
+
+  call s:assert.equals(denite#helper#_parse_options_args(
+        \ 'file/rec:''foo:bar'''), [[
+        \ {'name': 'file/rec', 'args': ['foo:bar']},
+        \ ], {}])
+
+  call s:assert.equals(denite#helper#_parse_options_args(
+        \ 'file/rec:"foo:bar"'), [[
+        \ {'name': 'file/rec', 'args': ['foo:bar']},
+        \ ], {}])
+
+  call s:assert.equals(denite#helper#_parse_options_args(
+        \ '-do="hoge" file/rec:"foo:bar"'), [[
+        \ {'name': 'file/rec', 'args': ['foo:bar']},
+        \ ], {'do': 'hoge'}])
 endfunction
